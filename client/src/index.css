@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+ 
+body {
+    font-family: "Sofia Sans", sans-serif;
+    background: linear-gradient(
+      180deg,
+      rgba(153, 88, 167, 0.216) 0%,
+      rgba(184, 66, 231, 0) 100%
+    );
+    background-size: cover;
+}
+  
