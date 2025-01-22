@@ -18,14 +18,35 @@ const LoginPage = () => {
 
     try {
       const response = await instance.post("/user/login", newUser);
-      console.log(response.data.token);  
-      localStorage.setItem("token", response.data.token);
-            if (response.status === 200) {
+      const data = response.data;
+    
+      if (response.status === 200) {
+        localStorage.setItem("token", data.token);
+    
         Swal.fire({
           title: "Success!",
-          text: "Login successful! Please log in.",
+          text: "Login successful!",
           icon: "success",
           confirmButtonText: "OK",
+        }).then(() => {
+          const role = data.newUser.role?.trim().toLowerCase();  
+
+          if (role === "customer") {
+            navigate("/customer");
+          } else if (role === "agent") {
+            navigate("/agent");
+          } else if (role === "admin") {
+            navigate("/admin");
+          } else {
+            console.error("Unknown role:", role);
+    
+            Swal.fire({
+              title: "Error!",
+              text: "Unknown user role. Please contact support.",
+              icon: "error",
+              confirmButtonText: "OK",
+            });
+          }
         });
       } else {
         Swal.fire({
@@ -36,14 +57,15 @@ const LoginPage = () => {
         });
       }
     } catch (error) {
-      console.error("Sign-up failed:", error);
+      console.error("Login failed:", error);
       Swal.fire({
         title: "Error!",
-        text: error.response?.data?.message || "Sign-up failed. Please try again later.",
+        text: error.response?.data?.message || "Login failed. Please try again later.",
         icon: "error",
         confirmButtonText: "OK",
       });
     }
+    
   };
 
   return (

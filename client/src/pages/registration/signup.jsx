@@ -11,7 +11,15 @@ const SignUpPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    if (password.length < 8) {
+      Swal.fire({
+        title: "Error!",
+        text: "Password must be at least 8 characters long.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+      return; 
+    }
     const newUser = {
       name,
       email,
@@ -21,6 +29,7 @@ const SignUpPage = () => {
     try {
       console.log("User Registered:", newUser);
       const response = await instance.post("/user/register", newUser);
+      const data = response.data;
 
       if (response.status === 201) {
         Swal.fire({
@@ -30,7 +39,24 @@ const SignUpPage = () => {
           confirmButtonText: "OK",
         }).then(() => {
           localStorage.setItem("token", response.data.token);
-          // navigate("/"); // Uncomment if you want to redirect after success
+          const role = data.newUser.role?.trim().toLowerCase();  
+
+          if (role === "customer") {
+            navigate("/customer");
+          } else if (role === "agent") {
+            navigate("/agent");
+          } else if (role === "admin") {
+            navigate("/admin");
+          } else {
+            console.error("Unknown role:", role);
+    
+            Swal.fire({
+              title: "Error!",
+              text: "Unknown user role. Please contact support.",
+              icon: "error",
+              confirmButtonText: "OK",
+            });
+          }
         });
       } else {
         Swal.fire({
@@ -41,15 +67,17 @@ const SignUpPage = () => {
         });
       }
     } catch (error) {
-      console.error("Sign-up failed:", error);
+      console.error("Login failed:", error);
       Swal.fire({
         title: "Error!",
-        text: error.response?.data?.message || "Sign-up failed. Please try again later.",
+        text: error.response?.data?.message || "Login failed. Please try again later.",
         icon: "error",
         confirmButtonText: "OK",
       });
     }
+    
   };
+
 
   return (
     <div className="flex justify-center items-center min-h-screen  ">

@@ -1,5 +1,5 @@
 import express from "express";
-import { addNoteAgent, addNoteToTicket, createTicket, getNotesForTicket, getTickets, getTicketsByCustomerId, getUserTickets, updateTicketStatus } from "../controllers/ticketControllers.js";
+import { addNoteAgent, addNoteToTicket, createTicket, deleteTicket, getNotesForTicket, getTickets, getTicketsByCustomerId, getUserTickets, updateTicketStatus } from "../controllers/ticketControllers.js";
 import authenticateUser from "../middleware/authorization.js";
 
 const ticketRouter = express.Router();
@@ -12,5 +12,6 @@ ticketRouter.post("/addNote", authenticateUser,addNoteToTicket);
 ticketRouter.post("/agent/addNote", authenticateUser,addNoteAgent);
 ticketRouter.put("/agent/updateStatus", authenticateUser,updateTicketStatus);
 ticketRouter.get("/:ticketId/notes", authenticateUser,getNotesForTicket);
+ticketRouter.delete('/:ticketId',authenticateUser,deleteTicket);
 
 export default ticketRouter;

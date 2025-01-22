@@ -274,4 +274,22 @@ const getNotesForTicket = async (req, res) => {
   }
 };
 
-export {createTicket,getTickets,getTicketsByCustomerId,updateTicketStatus,addNoteAgent,getNotesForTicket,addNoteToTicket,getUserTickets}
+const deleteTicket = async (req, res) => {
+  try {
+    if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'agent')) {
+      return res.status(403).json({ message: "Forbidden: You do not have the required role" });
+    }
+    const ticketId = req.params.ticketId;
+    const ticket = await Ticket.findByIdAndDelete(ticketId);
+
+    if (!ticket) {
+      return res.status(404).json({ message: 'Ticket not found' });
+    }
+    return res.status(200).json({ message: 'Ticket deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting ticket:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+export {createTicket,getTickets,getTicketsByCustomerId, deleteTicket ,updateTicketStatus,addNoteAgent,getNotesForTicket,addNoteToTicket,getUserTickets}

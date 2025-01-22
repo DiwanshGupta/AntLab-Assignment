@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import instance from '../../utils/axios';
+import Swal from 'sweetalert2';
+import { MdDelete } from 'react-icons/md';
+import { IoMdLogOut } from "react-icons/io";
+import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
   const [tickets, setTickets] = useState([]);
@@ -7,7 +11,12 @@ const AdminDashboard = () => {
   const [status, setStatus] = useState('');
   const [selectedTicketId, setSelectedTicketId] = useState(null);
   const token = localStorage.getItem("token");
+  const navigate = useNavigate(); // Hook to navigate between routes
 
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // Remove the token from localStorage
+    navigate("/login"); // Redirect to the login page
+  };
   useEffect(() => {
     const fetchTickets = async () => {
       try {
@@ -27,6 +36,47 @@ const AdminDashboard = () => {
 
     fetchTickets();
   }, [token]);
+
+  const handleDeleteTicket = async (ticketId) => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this action!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await instance.delete(`/tickets/${ticketId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.status === 200) {
+          Swal.fire(
+            'Deleted!',
+            'The ticket has been deleted.',
+            'success'
+          );
+
+          // Remove deleted ticket from the state
+          setTickets(tickets.filter(ticket => ticket._id !== ticketId));
+
+          // You can also update the stats after deleting a ticket (if applicable).
+          // fetchStatsAndTickets();
+        }
+      } catch (error) {
+        Swal.fire(
+          'Error!',
+          'There was an error deleting the ticket.',
+          'error'
+        );
+      }
+    }
+  };
 
   const handleAddNote = async () => {
     if (!newNote || !selectedTicketId) {
@@ -79,16 +129,21 @@ const AdminDashboard = () => {
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-semibold">Welcome, Customer Service Agent!</h1>
+        <h1 className="text-3xl font-semibold">Welcome, Admin!</h1>
+        <div className=' flex flex-row gap-3 items-center'>
         <a
           href="/admin/dashboard"
           className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition"
         >
-          Go to Dashboard
+          Go to Customers
         </a>
+        <div className='text-red-light-300' onClick={handleLogout}>
+             <IoMdLogOut size={24}/>
+          </div>
+        </div>
       </div>
 
-      <h2 className="text-2xl font-semibold mb-4">Tickets</h2>
+      <h2 className="text-2xl font-semibold mb-4">Tickets Section</h2>
       <div className="overflow-x-auto shadow-md rounded-lg">
         <table className="min-w-full bg-white table-auto">
           <thead className="bg-gray-200 text-gray-600">
@@ -113,6 +168,12 @@ const AdminDashboard = () => {
                     onClick={() => setSelectedTicketId(ticket._id)}
                   >
                     {selectedTicketId === ticket._id ? "Selected" : "Select Ticket"}
+                  </button>
+                  <button
+                    onClick={() => handleDeleteTicket(ticket._id)}
+                    className="ml-2 text-red-500"
+                  >
+                    <MdDelete size={24} />
                   </button>
                 </td>
               </tr>

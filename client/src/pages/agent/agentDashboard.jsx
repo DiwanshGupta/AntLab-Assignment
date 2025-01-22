@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import instance from '../../utils/axios';
+import { IoMdLogOut } from "react-icons/io";
+import { useNavigate } from 'react-router-dom';
 
 const AgentDashboard = () => {
   const [tickets, setTickets] = useState([]);
@@ -7,7 +9,12 @@ const AgentDashboard = () => {
   const [status, setStatus] = useState('');
   const [selectedTicketId, setSelectedTicketId] = useState(null);
   const token = localStorage.getItem("token");
+  const navigate = useNavigate(); // Hook to navigate between routes
 
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // Remove the token from localStorage
+    navigate("/login"); // Redirect to the login page
+  };
   useEffect(() => {
     const fetchTickets = async () => {
       try {
@@ -68,7 +75,7 @@ const AgentDashboard = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-
+      
       setTickets(tickets.map(ticket =>
         ticket._id === selectedTicketId ? response.data.ticket : ticket
       ));
@@ -80,7 +87,13 @@ const AgentDashboard = () => {
 
   return (
     <div className="container mx-auto p-4">
+      <div className="flex justify-between items-center mb-6">
       <h1 className="text-3xl font-semibold mb-4">Welcome, Customer Service Agent!</h1>
+
+        <div className='text-white font-semibold flex-row flex gap-2 bg-red-light-100 p-3 cursor-pointer rounded-lg' onClick={handleLogout}>
+            Logout <IoMdLogOut size={24}/>
+        </div>      
+      </div>
       <h2 className="text-2xl font-semibold mb-4">Tickets</h2>
       <div className="overflow-x-auto shadow-md rounded-lg">
         <table className="min-w-full bg-white table-auto">
